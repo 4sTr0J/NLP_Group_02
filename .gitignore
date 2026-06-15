@@ -216,6 +216,9 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+HEAD
 
 # Ignore large dataset
 data/vulnerabilities.csv
+
+0c11ff1 (Initial commit)

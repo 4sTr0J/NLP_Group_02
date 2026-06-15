@@ -1,2 +1,4 @@
+data/vulnerabilities.csv filter=lfs diff=lfs merge=lfs -text
+data/vulnerabilities_50k.csv filter=lfs diff=lfs merge=lfs -text
 models/cnn_model.keras filter=lfs diff=lfs merge=lfs -text
 models/random_forest.pkl filter=lfs diff=lfs merge=lfs -text
