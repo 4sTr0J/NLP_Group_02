@@ -1,4 +1,3 @@
-#Load Dataset
 import pandas as pd
 try:
     from IPython.display import display
@@ -11,7 +10,7 @@ except Exception:
         except Exception:
             print(repr(x))
 
-# Fix: read CSV once (previous code called pd.read_csv twice)
+#Load Dataset
 df = pd.read_csv("data/vulnerabilities.csv")
 display(df)
 
@@ -30,45 +29,37 @@ df.duplicated().sum()
 df.drop_duplicates(inplace=True)
 #print(df)
 
-#Remove Unnecessary Spaces
-text_columns = ['func','cwe','project','message']
-
-for col in text_columns:
-    df[col] = df[col].astype(str).str.strip()
-
-display(df.head())
-
-#Convert Data Types
-df['target'] = df['target'].astype(int)
+##drop columns
+df = df.drop(columns=['commit_id', 'hash', 'project', 'message'])
 display(df)
 
-#Check Unique Target Values
-df['target'].value_counts()
+#Reduced the dataset to 50,000 rows to match the source code requirements.
+#Extracting the Top 25,000 Class 0 Rows
+#Extracting the Top 25,000 Class 1 Rows
+target_0 = df[df['target'] == 0].sort_values(by='size', ascending=False).head(25000)
+target_1 = df[df['target'] == 1].sort_values(by='size', ascending=False).head(25000)
+combined_data = pd.concat([target_0, target_1])
+display(combined_data)
 
-#Remove Special Characters from Text Columns
+#Remove Comments from the 'func' Column
 import re
 
-def clean_text(text):
-    text = re.sub(r'[^a-zA-Z0-9\s]', ' ', str(text))
-    text = re.sub(r'\s+', ' ', text)
-    return text.lower()
+def remove_comments(text):
+    # Remove single-line comments
+    code = re.sub(r'//.*', '', text)
+    # Remove multi-line comments
+    code = re.sub(r'/\*[\s\S]*?\*/', '', code)
+    # Remove extra whitespace
+    code = re.sub(r'\s+', ' ', code)
+    return code.strip()
 
-for col in ['func','cwe','project','message']:
-    df[col] = df[col].apply(clean_text)
+combined_data['func'] = combined_data['func'].apply(remove_comments)
+display(combined_data)
 
-#Encode Categorical Features
-for col in ['project','cwe','func']:
-    df[col], _ = pd.factorize(df[col])
-
-display(df)
 
 #Final Check
-df.info()
-df.isnull().sum()
+combined_data.info()
+combined_data.isnull().sum()
 
-df_50k = df.sample(n=50000, random_state=42)
-
-print(df_50k.shape)
-
-df_50k.to_csv('data/vulnerabilities_50k.csv', index=False)
-display(df_50k)
+combined_data.to_csv('data/vulnerabilities_50k.csv', index=False)
+display(combined_data)
