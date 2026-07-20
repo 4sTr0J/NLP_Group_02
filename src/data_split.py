@@ -1,16 +1,26 @@
 import pandas as pd
-
-try:
-    from IPython.display import display
-except Exception:
-    # Fallback if IPython is not available (e.g., running as a script)
-    def display(x):
-        # simple fallback: print first few rows for DataFrame, else print repr
-        try:
-            print(x.head())
-        except Exception:
-            print(repr(x))
+from sklearn.model_selection import train_test_split
 
 #Load Dataset
-df = pd.read_csv("data/vulnerabilities.csv")
-display(df)
+df = pd.read_csv("data/vulnerabilities_50k.csv")
+df.head()
+
+x = df["func"]
+y = df["target"]
+
+#allocate 20% of the data for testing and 80% for training
+x_train, x_test, y_train, y_test = train_test_split(x,y, test_size=0.2, random_state=42, stratify=y, shuffle=True)
+
+train = pd.DataFrame({
+    "code":x_train,
+    "target":y_train
+})
+
+test = pd.DataFrame({
+    "code":x_test,
+    "target":y_test 
+})
+
+train.to_csv(r'data/train_data.csv', index=False)
+test.to_csv(r'data/test_data.csv', index=False)
+
