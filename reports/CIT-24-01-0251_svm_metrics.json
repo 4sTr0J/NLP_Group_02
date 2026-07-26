@@ -1,0 +1,27 @@
+{
+    "student_id": "CIT-24-01-0251",
+    "model": "Linear Support Vector Machine",
+    "feature_extraction": "TF-IDF with code tokenization",
+    "dataset_size": 10000,
+    "training_records": 7000,
+    "validation_records": 1500,
+    "testing_records": 1500,
+    "selected_c": 0.05,
+    "decision_threshold": -0.06927254607628547,
+    "test_accuracy": 0.7833333333333333,
+    "test_precision": 0.12618296529968454,
+    "test_recall": 0.45454545454545453,
+    "test_f1_score": 0.19753086419753085,
+    "test_average_precision": 0.1937341611993399,
+    "test_roc_auc": 0.7139011395827969,
+    "test_confusion_matrix": [
+        [
+            1135,
+            277
+        ],
+        [
+            48,
+            40
+        ]
+    ]
+}
