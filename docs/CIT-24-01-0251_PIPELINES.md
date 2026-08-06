@@ -29,6 +29,7 @@ The following components are available:
 src/cit_24_01_0251_svm_pipeline.py
 src/cit_24_01_0251_lstm_pipeline.py
 src/cit_24_01_0251_combined_pipeline.py
+src/cit_24_01_0251_adapter.py
 ```
 
 ### Model artifacts
@@ -44,6 +45,7 @@ models/CIT-24-01-0251_lstm_preprocessing.joblib
 ```text
 examples/safe_sample.c
 tests/test_cit_24_01_0251_pipelines.py
+tests/test_cit_24_01_0251_adapter.py
 reports/CIT-24-01-0251_svm_metrics.json
 reports/CIT-24-01-0251_lstm_metrics.json
 ```
