@@ -227,5 +227,3 @@ data/processed/
 *.keras
 *.h5
 
-Add-Content .gitignore "`n__pycache__/`n*.py[cod]"
-Remove-Item -Recurse -Force .\src\__pycache__
