@@ -20,8 +20,7 @@ import joblib
 import numpy as np
 import tensorflow as tf
 
-from tensorflow.keras.preprocessing.sequence import pad_sequences
-
+from keras.utils import pad_sequences
 
 # This tokenizer must match the tokenizer used during LSTM training.
 CODE_TOKEN_PATTERN = re.compile(
