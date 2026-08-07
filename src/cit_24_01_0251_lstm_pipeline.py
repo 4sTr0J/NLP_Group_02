@@ -19,8 +19,7 @@ os.environ.setdefault("TF_CPP_MIN_LOG_LEVEL", "2")
 import joblib
 import tensorflow as tf
 
-from tensorflow.keras.preprocessing.sequence import pad_sequences
-
+from keras.utils import pad_sequences
 
 # ---------------------------------------------------------
 # Tokenizer
