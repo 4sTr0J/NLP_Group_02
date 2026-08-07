@@ -17,12 +17,18 @@ from typing import Any
 os.environ.setdefault("TF_CPP_MIN_LOG_LEVEL", "2")
 
 import joblib
-import numpy as np
 import tensorflow as tf
 
-from keras.utils import pad_sequences
+from tensorflow.keras.preprocessing.sequence import pad_sequences
 
-# This tokenizer must match the tokenizer used during LSTM training.
+
+# ---------------------------------------------------------
+# Tokenizer
+# ---------------------------------------------------------
+
+# This tokenizer must match the tokenizer used during
+# LSTM training.
+
 CODE_TOKEN_PATTERN = re.compile(
     r"""
     0x[0-9A-Fa-f]+
@@ -46,29 +52,51 @@ def code_tokenizer(source_code: str) -> list[str]:
 
 def prepare_code_for_lstm(source_code: str) -> str:
     """Convert source-code tokens into a space-separated string."""
-    return " ".join(code_tokenizer(source_code))
+    return " ".join(
+        code_tokenizer(source_code)
+    )
 
+
+# ---------------------------------------------------------
+# Paths
+# ---------------------------------------------------------
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 
 DEFAULT_MODEL_PATH = (
     PROJECT_ROOT
     / "models"
-    / "CIT-24-01-0251_lstm_model.keras"
+    / "CIT-24-01-0251_lstm_embedding32_final.keras"
 )
 
 DEFAULT_PREPROCESSING_PATH = (
+    PROJECT_ROOT
+    / "models"
+    / "CIT-24-01-0251_lstm_embedding32_preprocessing.joblib"
+)
+
+LEGACY_MODEL_PATH = (
+    PROJECT_ROOT
+    / "models"
+    / "CIT-24-01-0251_lstm_model.keras"
+)
+
+LEGACY_PREPROCESSING_PATH = (
     PROJECT_ROOT
     / "models"
     / "CIT-24-01-0251_lstm_preprocessing.joblib"
 )
 
 
+# ---------------------------------------------------------
+# Artifact loading
+# ---------------------------------------------------------
+
 def load_lstm_artifacts(
     model_path: Path = DEFAULT_MODEL_PATH,
     preprocessing_path: Path = DEFAULT_PREPROCESSING_PATH,
 ) -> tuple[tf.keras.Model, dict[str, Any]]:
-    """Load the trained LSTM model and preprocessing bundle."""
+    """Load and validate the LSTM model and preprocessing bundle."""
 
     if not model_path.exists():
         raise FileNotFoundError(
@@ -93,9 +121,7 @@ def load_lstm_artifacts(
 
     required_items = {
         "tokenizer",
-        "maximum_sequence_length",
         "decision_threshold",
-        "class_labels",
     }
 
     missing_items = required_items.difference(
@@ -104,12 +130,35 @@ def load_lstm_artifacts(
 
     if missing_items:
         raise KeyError(
-            "The preprocessing bundle is missing these items: "
-            + ", ".join(sorted(missing_items))
+            "The preprocessing bundle is missing: "
+            + ", ".join(
+                sorted(missing_items)
+            )
+        )
+
+    # Support both the final bundle:
+    #     max_sequence_length
+    #
+    # and the original legacy bundle:
+    #     maximum_sequence_length
+
+    if (
+        "max_sequence_length"
+        not in preprocessing_bundle
+        and "maximum_sequence_length"
+        not in preprocessing_bundle
+    ):
+        raise KeyError(
+            "The preprocessing bundle does not contain "
+            "a sequence-length setting."
         )
 
     return model, preprocessing_bundle
 
+
+# ---------------------------------------------------------
+# Prediction
+# ---------------------------------------------------------
 
 def predict_vulnerability(
     source_code: str,
@@ -125,17 +174,44 @@ def predict_vulnerability(
             "The source-code input cannot be empty."
         )
 
-    tokenizer = preprocessing_bundle["tokenizer"]
+    tokenizer = preprocessing_bundle[
+        "tokenizer"
+    ]
 
-    maximum_sequence_length = int(
-        preprocessing_bundle["maximum_sequence_length"]
-    )
+    # -----------------------------------------------------
+    # New final bundle / legacy compatibility
+    # -----------------------------------------------------
+
+    if "max_sequence_length" in preprocessing_bundle:
+        maximum_sequence_length = int(
+            preprocessing_bundle[
+                "max_sequence_length"
+            ]
+        )
+    else:
+        maximum_sequence_length = int(
+            preprocessing_bundle[
+                "maximum_sequence_length"
+            ]
+        )
 
     threshold = float(
-        preprocessing_bundle["decision_threshold"]
+        preprocessing_bundle[
+            "decision_threshold"
+        ]
     )
 
-    class_labels = preprocessing_bundle["class_labels"]
+    class_labels = preprocessing_bundle.get(
+        "class_labels",
+        {
+            0: "Non-vulnerable",
+            1: "Vulnerable",
+        },
+    )
+
+    # -----------------------------------------------------
+    # Preprocessing
+    # -----------------------------------------------------
 
     prepared_code = prepare_code_for_lstm(
         cleaned_code
@@ -153,6 +229,10 @@ def predict_vulnerability(
         dtype="int32",
     )
 
+    # -----------------------------------------------------
+    # LSTM probability
+    # -----------------------------------------------------
+
     probability = float(
         model.predict(
             padded_sequence,
@@ -169,7 +249,11 @@ def predict_vulnerability(
         str(predicted_class),
     )
 
-    return {
+    # -----------------------------------------------------
+    # Response
+    # -----------------------------------------------------
+
+    result = {
         "student_id": "CIT-24-01-0251",
         "model": "Long Short-Term Memory Network",
         "prediction": predicted_class,
@@ -179,9 +263,34 @@ def predict_vulnerability(
         "token_count": len(
             code_tokenizer(cleaned_code)
         ),
-        "maximum_sequence_length": maximum_sequence_length,
+        "maximum_sequence_length": (
+            maximum_sequence_length
+        ),
     }
 
+    # Include final-model architecture information when
+    # available in the new preprocessing bundle.
+
+    if "embedding_dimension" in preprocessing_bundle:
+        result["embedding_dimension"] = int(
+            preprocessing_bundle[
+                "embedding_dimension"
+            ]
+        )
+
+    if "lstm_units" in preprocessing_bundle:
+        result["lstm_units"] = int(
+            preprocessing_bundle[
+                "lstm_units"
+            ]
+        )
+
+    return result
+
+
+# ---------------------------------------------------------
+# Input handling
+# ---------------------------------------------------------
 
 def read_source_code(
     code_argument: str | None,
@@ -200,7 +309,8 @@ def read_source_code(
     if file_argument:
         if not file_argument.exists():
             raise FileNotFoundError(
-                f"Input file was not found: {file_argument}"
+                "Input file was not found: "
+                f"{file_argument}"
             )
 
         return file_argument.read_text(
@@ -212,6 +322,10 @@ def read_source_code(
         "Use --code or --file."
     )
 
+
+# ---------------------------------------------------------
+# Command-line interface
+# ---------------------------------------------------------
 
 def main() -> None:
     """Run the command-line LSTM prediction pipeline."""
@@ -232,21 +346,27 @@ def main() -> None:
     parser.add_argument(
         "--file",
         type=Path,
-        help="Path to a file containing source code.",
+        help=(
+            "Path to a file containing source code."
+        ),
     )
 
     parser.add_argument(
         "--model",
         type=Path,
         default=DEFAULT_MODEL_PATH,
-        help="Optional path to the saved LSTM model.",
+        help=(
+            "Optional path to the saved LSTM model."
+        ),
     )
 
     parser.add_argument(
         "--preprocessing",
         type=Path,
         default=DEFAULT_PREPROCESSING_PATH,
-        help="Optional path to the preprocessing bundle.",
+        help=(
+            "Optional path to the preprocessing bundle."
+        ),
     )
 
     arguments = parser.parse_args()
@@ -257,9 +377,11 @@ def main() -> None:
             file_argument=arguments.file,
         )
 
-        model, preprocessing_bundle = load_lstm_artifacts(
-            model_path=arguments.model,
-            preprocessing_path=arguments.preprocessing,
+        model, preprocessing_bundle = (
+            load_lstm_artifacts(
+                model_path=arguments.model,
+                preprocessing_path=arguments.preprocessing,
+            )
         )
 
         result = predict_vulnerability(
@@ -268,7 +390,11 @@ def main() -> None:
             preprocessing_bundle=preprocessing_bundle,
         )
 
-        print("\nLSTM vulnerability prediction completed.\n")
+        print(
+            "\nLSTM vulnerability prediction "
+            "completed.\n"
+        )
+
         print(
             json.dumps(
                 result,
@@ -282,7 +408,10 @@ def main() -> None:
         OSError,
         ValueError,
     ) as error:
-        print(f"\nPipeline error: {error}")
+        print(
+            f"\nPipeline error: {error}"
+        )
+
         raise SystemExit(1) from error
 
 

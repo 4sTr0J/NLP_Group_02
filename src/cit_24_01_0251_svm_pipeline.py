@@ -14,9 +14,16 @@ from pathlib import Path
 from typing import Any
 
 import joblib
+from scipy.sparse import hstack
 
 
-# This tokenizer must match the tokenizer used when training the SVM.
+# ---------------------------------------------------------
+# Tokenizer
+# ---------------------------------------------------------
+
+# This tokenizer must match the tokenizer used when
+# training the token-based TF-IDF vectorizer.
+
 CODE_TOKEN_PATTERN = re.compile(
     r"""
     0x[0-9A-Fa-f]+
@@ -38,8 +45,14 @@ def code_tokenizer(source_code: str) -> list[str]:
     return CODE_TOKEN_PATTERN.findall(str(source_code))
 
 
-# Compatibility support for loading the saved TF-IDF vectorizer.
-# The vectorizer was originally created in a Jupyter notebook.
+# ---------------------------------------------------------
+# Joblib compatibility
+# ---------------------------------------------------------
+
+# The TF-IDF vectorizer was originally trained using a
+# tokenizer defined while Python was running as __main__.
+# Registering it here allows joblib to load that vectorizer.
+
 setattr(
     sys.modules["__main__"],
     "code_tokenizer",
@@ -47,46 +60,105 @@ setattr(
 )
 
 
+# ---------------------------------------------------------
+# Paths
+# ---------------------------------------------------------
+
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 
 DEFAULT_MODEL_PATH = (
+    PROJECT_ROOT
+    / "models"
+    / "CIT-24-01-0251_svm_weighted_hybrid_final.joblib"
+)
+
+LEGACY_MODEL_PATH = (
     PROJECT_ROOT
     / "models"
     / "CIT-24-01-0251_svm_model_bundle.joblib"
 )
 
 
+# ---------------------------------------------------------
+# Model loading
+# ---------------------------------------------------------
+
 def load_svm_bundle(
     model_path: Path = DEFAULT_MODEL_PATH,
 ) -> dict[str, Any]:
-    """Load the SVM model, TF-IDF vectorizer and metadata."""
+    """Load and validate an SVM model bundle."""
 
     if not model_path.exists():
         raise FileNotFoundError(
             "The SVM model bundle was not found:\n"
             f"{model_path}\n\n"
-            "Make sure the trained model exists inside the models folder."
+            "Make sure the trained model exists inside "
+            "the models folder."
         )
 
     bundle = joblib.load(model_path)
 
-    required_items = {
+    basic_required_items = {
         "model",
-        "vectorizer",
         "decision_threshold",
-        "class_labels",
     }
 
-    missing_items = required_items.difference(bundle)
+    missing_basic_items = basic_required_items.difference(
+        bundle
+    )
 
-    if missing_items:
+    if missing_basic_items:
         raise KeyError(
             "The model bundle is missing these items: "
-            + ", ".join(sorted(missing_items))
+            + ", ".join(
+                sorted(missing_basic_items)
+            )
         )
 
-    return bundle
+    # -----------------------------------------------------
+    # New weighted-hybrid bundle
+    # -----------------------------------------------------
 
+    if (
+        "token_vectorizer" in bundle
+        and "char_vectorizer" in bundle
+    ):
+        hybrid_required_items = {
+            "token_weight",
+            "char_weight",
+        }
+
+        missing_hybrid_items = (
+            hybrid_required_items.difference(bundle)
+        )
+
+        if missing_hybrid_items:
+            raise KeyError(
+                "The weighted-hybrid bundle is missing: "
+                + ", ".join(
+                    sorted(missing_hybrid_items)
+                )
+            )
+
+        return bundle
+
+    # -----------------------------------------------------
+    # Legacy single-vectorizer bundle
+    # -----------------------------------------------------
+
+    if "vectorizer" in bundle:
+        return bundle
+
+    raise KeyError(
+        "Unsupported SVM bundle format. "
+        "Expected either a weighted-hybrid bundle "
+        "or a legacy single-vectorizer bundle."
+    )
+
+
+# ---------------------------------------------------------
+# Prediction
+# ---------------------------------------------------------
 
 def predict_vulnerability(
     source_code: str,
@@ -97,17 +169,99 @@ def predict_vulnerability(
     cleaned_code = source_code.strip()
 
     if not cleaned_code:
-        raise ValueError("The source-code input cannot be empty.")
+        raise ValueError(
+            "The source-code input cannot be empty."
+        )
 
     model = bundle["model"]
-    vectorizer = bundle["vectorizer"]
-    threshold = float(bundle["decision_threshold"])
-    class_labels = bundle["class_labels"]
 
-    features = vectorizer.transform([cleaned_code])
+    threshold = float(
+        bundle["decision_threshold"]
+    )
+
+    class_labels = bundle.get(
+        "class_labels",
+        {
+            0: "Non-vulnerable",
+            1: "Vulnerable",
+        },
+    )
+
+    # -----------------------------------------------------
+    # New weighted token + character TF-IDF model
+    # -----------------------------------------------------
+
+    if (
+        "token_vectorizer" in bundle
+        and "char_vectorizer" in bundle
+    ):
+        token_vectorizer = bundle[
+            "token_vectorizer"
+        ]
+
+        char_vectorizer = bundle[
+            "char_vectorizer"
+        ]
+
+        token_weight = float(
+            bundle["token_weight"]
+        )
+
+        char_weight = float(
+            bundle["char_weight"]
+        )
+
+        token_features = (
+            token_vectorizer.transform(
+                [cleaned_code]
+            )
+        )
+
+        char_features = (
+            char_vectorizer.transform(
+                [cleaned_code]
+            )
+        )
+
+        features = hstack(
+            [
+                token_features * token_weight,
+                char_features * char_weight,
+            ],
+            format="csr",
+        )
+
+        representation = (
+            "Weighted token + character TF-IDF"
+        )
+
+    # -----------------------------------------------------
+    # Legacy single-vectorizer model
+    # -----------------------------------------------------
+
+    elif "vectorizer" in bundle:
+        vectorizer = bundle["vectorizer"]
+
+        features = vectorizer.transform(
+            [cleaned_code]
+        )
+
+        representation = "Token TF-IDF"
+
+    else:
+        raise KeyError(
+            "No compatible vectorizer was found "
+            "inside the SVM bundle."
+        )
+
+    # -----------------------------------------------------
+    # SVM decision
+    # -----------------------------------------------------
 
     decision_score = float(
-        model.decision_function(features)[0]
+        model.decision_function(
+            features
+        )[0]
     )
 
     predicted_class = int(
@@ -122,19 +276,26 @@ def predict_vulnerability(
     return {
         "student_id": "CIT-24-01-0251",
         "model": "Linear Support Vector Machine",
+        "representation": representation,
         "prediction": predicted_class,
         "label": predicted_label,
         "decision_score": decision_score,
         "decision_threshold": threshold,
-        "token_count": len(code_tokenizer(cleaned_code)),
+        "token_count": len(
+            code_tokenizer(cleaned_code)
+        ),
     }
 
+
+# ---------------------------------------------------------
+# Input handling
+# ---------------------------------------------------------
 
 def read_source_code(
     code_argument: str | None,
     file_argument: Path | None,
 ) -> str:
-    """Read source code from a command argument or text file."""
+    """Read source code from an argument or file."""
 
     if code_argument and file_argument:
         raise ValueError(
@@ -147,7 +308,8 @@ def read_source_code(
     if file_argument:
         if not file_argument.exists():
             raise FileNotFoundError(
-                f"Input file was not found: {file_argument}"
+                "Input file was not found: "
+                f"{file_argument}"
             )
 
         return file_argument.read_text(
@@ -159,6 +321,10 @@ def read_source_code(
         "Use --code or --file."
     )
 
+
+# ---------------------------------------------------------
+# Command-line interface
+# ---------------------------------------------------------
 
 def main() -> None:
     """Run the command-line prediction pipeline."""
@@ -179,14 +345,18 @@ def main() -> None:
     parser.add_argument(
         "--file",
         type=Path,
-        help="Path to a file containing source code.",
+        help=(
+            "Path to a file containing source code."
+        ),
     )
 
     parser.add_argument(
         "--model",
         type=Path,
         default=DEFAULT_MODEL_PATH,
-        help="Optional path to the saved SVM model bundle.",
+        help=(
+            "Optional path to an SVM model bundle."
+        ),
     )
 
     arguments = parser.parse_args()
@@ -206,7 +376,11 @@ def main() -> None:
             svm_bundle,
         )
 
-        print("\nSVM vulnerability prediction completed.\n")
+        print(
+            "\nSVM vulnerability prediction "
+            "completed.\n"
+        )
+
         print(
             json.dumps(
                 result,
@@ -219,7 +393,10 @@ def main() -> None:
         KeyError,
         ValueError,
     ) as error:
-        print(f"\nPipeline error: {error}")
+        print(
+            f"\nPipeline error: {error}"
+        )
+
         raise SystemExit(1) from error
 
 
