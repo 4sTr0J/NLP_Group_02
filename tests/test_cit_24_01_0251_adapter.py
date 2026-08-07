@@ -147,5 +147,78 @@ class TestAdapterIntegration(unittest.TestCase):
         )
 
 
+    def test_group_ready_prediction_structure(self) -> None:
+        result = self.predictor.predict_for_group(
+            self.source_code
+        )
+
+        self.assertEqual(
+            result["student_id"],
+            "CIT-24-01-0251",
+        )
+
+        self.assertEqual(
+            result["student_name"],
+            "Ravishka Rathnayake",
+        )
+
+        self.assertIsInstance(
+            result["models_agree"],
+            bool,
+        )
+
+        self.assertIsInstance(
+            result["review_required"],
+            bool,
+        )
+
+        self.assertIn(
+            result["vulnerable_votes"],
+            {0, 1, 2},
+        )
+
+        self.assertIn(
+            "svm",
+            result["model_results"],
+        )
+
+        self.assertIn(
+            "lstm",
+            result["model_results"],
+        )
+
+        if result["models_agree"]:
+            self.assertFalse(
+                result["review_required"]
+            )
+
+            self.assertIn(
+                result["final_prediction"],
+                {0, 1},
+            )
+
+            self.assertIn(
+                result["final_label"],
+                {
+                    "Vulnerable",
+                    "Non-vulnerable",
+                },
+            )
+
+        else:
+            self.assertTrue(
+                result["review_required"]
+            )
+
+            self.assertIsNone(
+                result["final_prediction"]
+            )
+
+            self.assertEqual(
+                result["final_label"],
+                "Review required",
+            )
+
 if __name__ == "__main__":
     unittest.main()
+

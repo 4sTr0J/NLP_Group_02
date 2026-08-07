@@ -127,11 +127,51 @@ class RavishkaVulnerabilityPredictor:
             "comparison": comparison,
         }
 
+    def predict_for_group(
+    self,
+    source_code: str,
+    ) -> dict[str, Any]:
+        """Return a simplified result for group integration."""
+
+        result = self.predict(source_code)
+
+        svm_result = result["models"]["svm"]
+        comparison = result["comparison"]
+
+        models_agree = bool(
+            comparison["models_agree"]
+        )
+
+        if models_agree:
+            final_prediction = int(
+                svm_result["prediction"]
+            )
+            final_label = str(
+                comparison["agreed_label"]
+            )
+            review_required = False
+        else:
+            final_prediction = None
+            final_label = "Review required"
+            review_required = True
+
+        return {
+            "student_id": "CIT-24-01-0251",
+            "student_name": "Ravishka Rathnayake",
+            "final_prediction": final_prediction,
+            "final_label": final_label,
+            "review_required": review_required,
+            "models_agree": models_agree,
+            "vulnerable_votes": int(
+                comparison["vulnerable_votes"]
+            ),
+            "model_results": result["models"],
+        }
     @staticmethod
     def _validate_source_code(
         source_code: str,
     ) -> None:
-        """Reject empty or invalid source-code input."""
+        """Validate source-code input."""
 
         if not isinstance(source_code, str):
             raise TypeError(
