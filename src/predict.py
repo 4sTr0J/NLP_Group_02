@@ -16,25 +16,7 @@ from feature_engineering import CodeFeatureExtract
 
 model_dir    = project_root / "models" / "codebert"   # FIX: use Path object, not a raw string with forward slashes
 
-# Language detection
-_PYGMENTS_TO_LANG = {
-    "c":          "c",
-    "c++":        "cpp",
-    "python":     "python",
-    "python 3":   "python",
-    "java":       "java",
-    "javascript": "javascript",
-}
-
-def detect_lang(code: str) -> str:
-    try:
-        lexer = guess_lexer(code)
-        name  = lexer.name.lower()
-        return _PYGMENTS_TO_LANG.get(name, "c")
-    except ClassNotFound:
-        return "c"
-    except Exception:
-        return "c"
+from feature_engineering import CodeFeatureExtract, detect_lang
 
 
 # Load models

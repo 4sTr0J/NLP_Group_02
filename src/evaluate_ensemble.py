@@ -18,24 +18,7 @@ model_dir    = project_root / "models" / "codebert"
 test_path    = project_root / "data" / "test_data.csv"
 
 # Language detection
-_PYGMENTS_TO_LANG = {
-    "c":          "c",
-    "c++":        "cpp",
-    "python":     "python",
-    "python 3":   "python",
-    "java":       "java",
-    "javascript": "javascript",
-}
-
-def detect_lang(code: str) -> str:
-    try:
-        lexer = guess_lexer(code)
-        name  = lexer.name.lower()
-        return _PYGMENTS_TO_LANG.get(name, "c")
-    except ClassNotFound:
-        return "c"
-    except Exception:
-        return "c"
+from feature_engineering import detect_lang
 
 def main():
     print("Loading test data...", flush=True)

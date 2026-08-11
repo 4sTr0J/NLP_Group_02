@@ -1,3 +1,10 @@
+import sys
+from pathlib import Path
+
+project_root = Path(r"D:\NLP project").resolve()
+sys.path.append(str(project_root))
+sys.path.append(str(project_root / "src"))
+
 from feature_engineering import CodeFeatureExtract
 import pandas as pd
 import joblib
@@ -10,25 +17,7 @@ from pygments.lexers import guess_lexer
 from pygments.util import ClassNotFound
 
 # Language detection
-
-_PYGMENTS_TO_LANG = {
-    "c":        "c",
-    "c++":      "cpp",
-    "python":   "python",
-    "python 3": "python",
-    "java":     "java",
-    "javascript": "javascript",
-}
-
-def detect_lang(code: str) -> str:
-    try:
-        lexer = guess_lexer(code)
-        name  = lexer.name.lower()
-        return _PYGMENTS_TO_LANG.get(name, "c")
-    except ClassNotFound:
-        return "c"
-    except Exception:
-        return "c"
+from feature_engineering import detect_lang
 
 
 # Load data

@@ -27,6 +27,44 @@ def _get_parser(lang: str):
     return _PARSER_REGISTRY[lang]
 
 
+# Language detection patterns and helper
+_PYGMENTS_TO_LANG = {
+    "c":          "c",
+    "c++":        "cpp",
+    "python":     "python",
+    "python 3":   "python",
+    "java":       "java",
+    "javascript": "javascript",
+}
+
+def detect_lang(code: str) -> str:
+    """Hybrid Language Detector using pattern matching and Pygments fallback."""
+    # 1. Java check
+    if "public class " in code or "system.out.print" in code.lower() or "import java." in code:
+        return "java"
+    
+    # 2. C++ check
+    if "std::" in code or "using namespace std" in code or "cout <<" in code or "#include <iostream>" in code:
+        return "cpp"
+        
+    # 3. JavaScript check
+    if "const " in code and "require(" in code or "let " in code or "function(" in code:
+        if not ("{" in code and ";" in code):  # make sure it's not C/Java
+            return "javascript"
+
+    # 4. Fallback to Pygments statistical guesser
+    try:
+        from pygments.lexers import guess_lexer
+        lexer = guess_lexer(code)
+        name = lexer.name.lower()
+        for py_name, canon_name in _PYGMENTS_TO_LANG.items():
+            if py_name in name:
+                return canon_name
+    except Exception:
+        pass
+        
+    return "c"  # Default fallback
+
 # Language patterns and keywords
 
 RISKY_API = re.compile(
