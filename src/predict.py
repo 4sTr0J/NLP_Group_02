@@ -1,6 +1,10 @@
 import sys
 from pathlib import Path
 
+project_root = Path(r"D:\NLP project").resolve()
+sys.path.append(str(project_root))
+sys.path.append(str(project_root / "src"))
+
 print("Loading models, please wait...", flush=True)
 
 import joblib
@@ -10,7 +14,6 @@ from pygments.lexers import guess_lexer
 from pygments.util import ClassNotFound
 from feature_engineering import CodeFeatureExtract
 
-project_root = Path(r"G:\My Drive\NLP project").resolve()
 model_dir    = project_root / "models" / "codebert"   # FIX: use Path object, not a raw string with forward slashes
 
 # Language detection
@@ -88,7 +91,7 @@ while True:
         code,
         return_tensors="pt",
         truncation=True,
-        padding=True,
+        padding="max_length",
         max_length=512,
     )
     inputs = {k: v.to(device) for k, v in inputs.items()}
@@ -131,16 +134,16 @@ while True:
     print("-" * 60)
 
     if final == "HIGH RISK":
-        print("✓ Vulnerabilities detected by both models.")
-        print("✓ Review unsafe memory operations.")
-        print("✓ Validate all user inputs.")
-        print("✓ Avoid strcpy(), gets(), sprintf().")
-        print("✓ Use strncpy(), fgets(), snprintf() instead.")
+        print("* Vulnerabilities detected by both models.")
+        print("* Review unsafe memory operations.")
+        print("* Validate all user inputs.")
+        print("* Avoid strcpy(), gets(), sprintf().")
+        print("* Use strncpy(), fgets(), snprintf() instead.")
     elif final == "SAFE":
-        print("✓ No vulnerability detected.")
-        print("✓ Continue following secure coding practices.")
+        print("* No vulnerability detected.")
+        print("* Continue following secure coding practices.")
     else:
-        print("✓ The two models disagree.")
-        print("✓ Manual code review is recommended.")
+        print("* The two models disagree.")
+        print("* Manual code review is recommended.")
 
     print("\n")

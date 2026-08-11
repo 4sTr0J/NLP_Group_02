@@ -1,7 +1,9 @@
 from pathlib import Path
 import numpy as np
+import torch
 from datasets import load_dataset
 from transformers import (
+    AutoConfig,
     AutoTokenizer,
     AutoModelForSequenceClassification,
     Trainer,
@@ -9,7 +11,7 @@ from transformers import (
 )
 from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score, roc_auc_score
 
-project_root = Path(r"G:\My Drive\NLP project").resolve()
+project_root = Path(r"D:\NLP project").resolve()
 data_dir     = project_root / "data"
 model_dir    = project_root / "models" / "codebert"   # FIX: was "bert-based_model", now matches predict.py
 
@@ -18,13 +20,21 @@ test_path  = data_dir / "test_data.csv"
 
 # Load tokenizer and model from Hugging Face
 tokenizer = AutoTokenizer.from_pretrained("microsoft/codebert-base")
+config    = AutoConfig.from_pretrained("microsoft/codebert-base")
+config.num_labels = 2
 model     = AutoModelForSequenceClassification.from_pretrained(
-    "microsoft/codebert-base", num_labels=2
+    "microsoft/codebert-base", config=config
 )
 
-# Load datasets
-train_dataset = load_dataset("csv", data_files=str(train_path), split="train")
-test_dataset  = load_dataset("csv", data_files=str(test_path),  split="train")
+import pandas as pd
+from datasets import Dataset
+
+# Load full datasets using pandas for robustness and convert to HF Dataset
+train_df = pd.read_csv(train_path)
+test_df  = pd.read_csv(test_path)
+
+train_dataset = Dataset.from_pandas(train_df, preserve_index=False)
+test_dataset  = Dataset.from_pandas(test_df, preserve_index=False)
 
 def preprocess_function(examples):
     tokenized = tokenizer(
@@ -36,8 +46,8 @@ def preprocess_function(examples):
     tokenized["labels"] = examples["target"]
     return tokenized
 
-train_dataset = train_dataset.map(preprocess_function, batched=True, remove_columns=["code", "target"])
-test_dataset  = test_dataset.map(preprocess_function,  batched=True, remove_columns=["code", "target"])
+train_dataset = train_dataset.map(preprocess_function, batched=True, remove_columns=["code", "target"], load_from_cache_file=False)
+test_dataset  = test_dataset.map(preprocess_function,  batched=True, remove_columns=["code", "target"], load_from_cache_file=False)
 
 # Evaluation metrics
 def compute_metrics(eval_pred):
@@ -62,9 +72,11 @@ training_args = TrainingArguments(
     save_total_limit=2,
     load_best_model_at_end=True,  # saves the best checkpoint automatically
     metric_for_best_model="f1",
-    logging_dir=str(project_root / "logs"),
     logging_steps=50,
-    fp16=True,                    # faster training if GPU is available; safe to keep on CPU too
+    learning_rate=2e-5,
+    warmup_steps=100,
+    weight_decay=0.01,
+    fp16=torch.cuda.is_available(),                    # faster training if GPU is available; safe to keep on CPU too
 )
 
 trainer = Trainer(

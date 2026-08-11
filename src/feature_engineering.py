@@ -32,7 +32,7 @@ def _get_parser(lang: str):
 RISKY_API = re.compile(
     r"\b(strcpy|strcat|sprintf|vprintf|gets|scanf|sscanf|system|popen|exec|execl|execve|"
     r"eval|passthru|shell_exec|base64_decode|unserialize|pickle|load|readobject|"
-    r"memcpy|memmove|malloc|realloc|free|alloca|printf|fprintf)\b",
+    r"alloca)\b",
     re.IGNORECASE,
 )
 # NOTE: fixed typos in original: 'peopen' -> 'popen', 'laod' -> 'load', 'memove' -> 'memmove'

@@ -32,8 +32,8 @@ def detect_lang(code: str) -> str:
 
 
 # Load data
-train = pd.read_csv(r'G:\My Drive\NLP project\data\train_data.csv')
-test  = pd.read_csv(r'G:\My Drive\NLP project\data\test_data.csv')
+train = pd.read_csv(r'D:\NLP project\data\train_data.csv')
+test  = pd.read_csv(r'D:\NLP project\data\test_data.csv')
 
 # Detect language for each sample
 if "lang" not in train.columns:
@@ -52,7 +52,7 @@ test_langs  = test["lang"].tolist()
 
 extractor = CodeFeatureExtract(
     lang=train_langs,
-    max_ngram_features=1000,
+    max_ngram_features=3000,
 )
 
 x_train = extractor.fit_transform(train["code"])
@@ -60,7 +60,7 @@ y_train = train["target"]
 
 # BUG FIX: instead of mutating extractor.lang (fragile), create a fresh extractor
 # that shares the fitted vectorizer_ so the same vocabulary is applied to test data.
-test_extractor = CodeFeatureExtract(lang=test_langs, max_ngram_features=1000)
+test_extractor = CodeFeatureExtract(lang=test_langs, max_ngram_features=3000)
 test_extractor.vectorizer_    = extractor.vectorizer_
 test_extractor.feature_names_ = extractor.feature_names_
 
@@ -87,7 +87,7 @@ model.fit(x_train, y_train)
 # Saving both model and extractor together so predict.py can load them as one unit.
 joblib.dump(
     {"model": model, "extractor": extractor},
-    r"G:\My Drive\NLP project\models\xgboost_model.pkl",
+    r"D:\NLP project\models\xgboost_model.pkl",
 )
 print("Model saved to models/xgboost_model.pkl")
 

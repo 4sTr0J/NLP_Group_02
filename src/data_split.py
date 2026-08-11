@@ -1,7 +1,7 @@
 import pandas as pd
 from sklearn.model_selection import train_test_split
 
-df = pd.read_csv(r'G:\My Drive\NLP project\data\cleaned_data_of_vulnerabilities.csv')
+df = pd.read_csv(r'D:\NLP project\data\cleaned_data_of_vulnerabilities.csv')
 
 x = df["func"]
 y = df["target"]
@@ -19,5 +19,5 @@ test = pd.DataFrame({
     "target":y_test 
 })
 
-train.to_csv(r'G:\My Drive\NLP project\data\train_data.csv', index=False)
-test.to_csv(r'G:\My Drive\NLP project\data\test_data.csv', index=False)
+train.to_csv(r'D:\NLP project\data\train_data.csv', index=False)
+test.to_csv(r'D:\NLP project\data\test_data.csv', index=False)
