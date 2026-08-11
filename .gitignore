@@ -151,6 +151,16 @@ activemq-data/
 .env
 .envrc
 .venv
+.venv311
+.venv312
+.venvgpu
+python_3.12_cuda/
+python-3.12.10-amd64.exe
+python312.exe
+python312.dll
+get-pip.py
+vcruntime140.dll
+vcruntime140_1.dll
 env/
 venv/
 ENV/
