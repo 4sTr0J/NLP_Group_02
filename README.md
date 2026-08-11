@@ -46,12 +46,12 @@ Large dataset files are excluded from GitHub through `.gitignore`.
 - Deep Learning Model: Long Short-Term Memory Network
 - Branch: `features/CIT-24-01-0251-SVM+LSTM`
 
-### Team Member 02 – Loshan Mihisara
+### CIT-24-01-0249 – Loshan Mihisara
 
 - Machine Learning Model: Random Forest
 - Deep Learning Model: Convolutional Neural Network
 
-### Team Member 03 – Nadil Kularathne
+### CIT-24-01-0475 – Nadil Kularathne
 
 - Machine Learning Model: XGBoost
 - Deep Learning Model: CodeBERT
