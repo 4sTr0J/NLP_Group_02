@@ -5,6 +5,23 @@ project_root = Path(r"D:\NLP project").resolve()
 train_path = project_root / "data" / "train_data.csv"
 vuln_path = project_root / "data" / "vulnerabilities.csv"
 
+import re
+
+def remove_comments(text):
+    if not isinstance(text, str):
+        return ""
+    # Remove single-line comments
+    code = re.sub(r'//.*', '', text)
+    # Remove multi-line comments
+    code = re.sub(r'/\*[\s\S]*?\*/', '', code)
+    # Normalize spaces/tabs per line, preserving newline structure
+    lines = []
+    for line in code.splitlines():
+        norm_line = re.sub(r'[ \t]+', ' ', line).strip()
+        if norm_line:
+            lines.append(norm_line)
+    return "\n".join(lines)
+
 def main():
     print("Loading current train_data.csv...")
     train_df = pd.read_csv(train_path)
@@ -24,8 +41,8 @@ def main():
         safe_chunk = chunk[chunk["target"] == 0]
         
         for _, row in safe_chunk.iterrows():
-            code = str(row["func"])
-            if code not in existing_codes:
+            code = remove_comments(str(row["func"]))
+            if code and code not in existing_codes:
                 safe_samples.append({"code": code, "target": 0})
                 # Add to set to prevent duplicate extraction
                 existing_codes.add(code)

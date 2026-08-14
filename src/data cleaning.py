@@ -52,9 +52,13 @@ def remove_comments(text):
     code = re.sub(r'//.*', '', text)
     # Remove multi-line comments
     code = re.sub(r'/\*[\s\S]*?\*/', '', code)
-    # Remove extra whitespace
-    code = re.sub(r'\s+', ' ', code)
-    return code.strip()
+    # Normalize spaces/tabs per line, preserving newline structure
+    lines = []
+    for line in code.splitlines():
+        norm_line = re.sub(r'[ \t]+', ' ', line).strip()
+        if norm_line:
+            lines.append(norm_line)
+    return "\n".join(lines)
 
 combined_data['func'] = combined_data['func'].apply(remove_comments)
 
