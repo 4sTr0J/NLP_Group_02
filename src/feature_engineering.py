@@ -321,10 +321,10 @@ class CodeFeatureExtract(BaseEstimator, TransformerMixin):
         for i, code in enumerate(X):
             rows.append(extract_features(code, self._lang_for(i)))
 
-        hand_df = pd.DataFrame(rows).fillna(0)
+        hand_df = pd.DataFrame(rows).fillna(0).astype(np.float32)
 
         norm_texts   = [self._normalized_text(c) for c in X]
-        ngram_matrix = self.vectorizer_.transform(norm_texts).toarray()
+        ngram_matrix = self.vectorizer_.transform(norm_texts).astype(np.float32).toarray()
         ngram_cols   = [f"ngram_{t}" for t in self.vectorizer_.get_feature_names_out()]
         ngram_df     = pd.DataFrame(ngram_matrix, columns=ngram_cols)
 
@@ -333,7 +333,7 @@ class CodeFeatureExtract(BaseEstimator, TransformerMixin):
             axis=1,
         )
         self.feature_names_ = list(combined.columns)
-        return combined.values
+        return combined.values.astype(np.float32)
 
     def get_feature_names_out(self, input_features=None):
         return np.array(self.feature_names_)
