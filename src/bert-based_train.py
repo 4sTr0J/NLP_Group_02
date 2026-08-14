@@ -8,6 +8,7 @@ from transformers import (
     AutoModelForSequenceClassification,
     Trainer,
     TrainingArguments,
+    EarlyStoppingCallback,
 )
 from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score, roc_auc_score
 
@@ -64,7 +65,7 @@ def compute_metrics(eval_pred):
 
 training_args = TrainingArguments(
     output_dir=str(model_dir),
-    num_train_epochs=3,
+    num_train_epochs=15,
     per_device_train_batch_size=16,
     per_device_eval_batch_size=16,
     eval_strategy="epoch",        # FIX: was missing — now evaluates after every epoch
@@ -73,7 +74,7 @@ training_args = TrainingArguments(
     load_best_model_at_end=True,  # saves the best checkpoint automatically
     metric_for_best_model="f1",
     logging_steps=50,
-    learning_rate=2e-5,
+    learning_rate=3e-5,
     warmup_steps=100,
     weight_decay=0.01,
     fp16=torch.cuda.is_available(),                    # faster training if GPU is available; safe to keep on CPU too
@@ -85,6 +86,7 @@ trainer = Trainer(
     train_dataset=train_dataset,
     eval_dataset=test_dataset,
     compute_metrics=compute_metrics,
+    callbacks=[EarlyStoppingCallback(early_stopping_patience=3)],
 )
 
 trainer.train()

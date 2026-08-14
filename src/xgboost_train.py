@@ -41,7 +41,7 @@ test_langs  = test["lang"].tolist()
 
 extractor = CodeFeatureExtract(
     lang=train_langs,
-    max_ngram_features=3000,
+    max_ngram_features=20000,
 )
 
 x_train = extractor.fit_transform(train["code"])
@@ -49,7 +49,7 @@ y_train = train["target"]
 
 # BUG FIX: instead of mutating extractor.lang (fragile), create a fresh extractor
 # that shares the fitted vectorizer_ so the same vocabulary is applied to test data.
-test_extractor = CodeFeatureExtract(lang=test_langs, max_ngram_features=3000)
+test_extractor = CodeFeatureExtract(lang=test_langs, max_ngram_features=20000)
 test_extractor.vectorizer_    = extractor.vectorizer_
 test_extractor.feature_names_ = extractor.feature_names_
 
@@ -62,9 +62,11 @@ print(f"scale_pos_weight: {scale_pos_weight:.4f}")
 
 # Train
 model = XGBClassifier(
-    n_estimators=200,
-    max_depth=5,
-    learning_rate=0.1,
+    n_estimators=800,
+    max_depth=10,
+    learning_rate=0.05,
+    subsample=0.8,
+    colsample_bytree=0.8,
     scale_pos_weight=scale_pos_weight,
     eval_metric="aucpr",
     random_state=42,
