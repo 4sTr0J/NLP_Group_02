@@ -63,6 +63,13 @@ pip install -r src/Requirements.txt
 
 ## 🖥️ Usage
 
+> [!IMPORTANT]
+> The large pre-trained CodeBERT model weights (~500MB) are ignored by Git. Before running the scanner or evaluation scripts, you **must train the model locally** to generate these weights:
+> ```powershell
+> .\python_3.12_cuda\python.exe src/bert-based_train.py
+> ```
+> This will save the fine-tuned model and configuration inside `models/codebert/`.
+
 ### 1. Run Interactive Vulnerability Scanner
 To test snippets or source files interactively, execute the prediction script:
 
@@ -70,6 +77,7 @@ To test snippets or source files interactively, execute the prediction script:
 .\python_3.12_cuda\python.exe src/predict.py
 ```
 *Paste your source code in the terminal, type `END` on a new line, and hit Enter to get prediction results.*
+
 
 ### 2. Run Test Set Evaluation
 To run the full evaluation suite and print performance metrics:

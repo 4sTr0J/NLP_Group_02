@@ -226,3 +226,10 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+
+# Google Drive sync temp directories
+.tmp.driveupload/
+
+# Large model binaries / checkpoints
+models/codebert/
+
