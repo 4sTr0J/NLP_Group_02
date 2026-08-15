@@ -295,10 +295,10 @@ All six models were trained and evaluated using the same common dataset split to
 |---|---|---:|
 | Machine Learning | Support Vector Machine | 0.8680 |
 | Machine Learning | Random Forest | ADD EXACT COMMON-TEST RESULT |
-| Machine Learning | XGBoost | ADD EXACT COMMON-TEST RESULT |
+| Machine Learning | XGBoost | 0.5892 |
 | Deep Learning | Long Short-Term Memory Network | 0.8833 |
 | Deep Learning | Convolutional Neural Network | ADD EXACT COMMON-TEST RESULT |
-| Deep Learning | CodeBERT | ADD EXACT COMMON-TEST RESULT |
+| Deep Learning | CodeBERT | 0.6583 |
 
 ### Selected Models
 
