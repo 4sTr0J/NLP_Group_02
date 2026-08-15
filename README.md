@@ -268,7 +268,7 @@ Token TF-IDF captures programming-language keywords, identifiers and operators.
 
 Character TF-IDF captures local syntax, character patterns and programming structures.
 
-### Final Long Short-Term Memory Configuration
+### Final Long Short-Term Memory Network Configuration
 
 The final LSTM processes source code as a sequence of programming-related tokens.
 
@@ -297,6 +297,16 @@ After evaluating all six models using the same common dataset split:
 Therefore, the SVM and LSTM were selected for final system integration.
 
 ---
+### Six-Model Accuracy Comparison
+
+| Category | Model | Accuracy |
+|---|---|---:|
+| Machine Learning | Support Vector Machine | 0.8680 |
+| Machine Learning | Random Forest | ADD RESULT |
+| Machine Learning | XGBoost | ADD RESULT |
+| Deep Learning | Long Short-Term Memory Network | 0.8833 |
+| Deep Learning | Convolutional Neural Network | ADD RESULT |
+| Deep Learning | CodeBERT | ADD RESULT |
 
 ## Results Summary
 
