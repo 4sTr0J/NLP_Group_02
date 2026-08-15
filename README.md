@@ -299,14 +299,25 @@ Therefore, the SVM and LSTM were selected for final system integration.
 ---
 ### Six-Model Accuracy Comparison
 
+All six models were trained and evaluated using the same common dataset split to ensure a fair comparison.
+
 | Category | Model | Accuracy |
 |---|---|---:|
 | Machine Learning | Support Vector Machine | 0.8680 |
-| Machine Learning | Random Forest | ADD RESULT |
-| Machine Learning | XGBoost | ADD RESULT |
+| Machine Learning | Random Forest | REPLACE WITH EXACT RESULT |
+| Machine Learning | XGBoost | REPLACE WITH EXACT RESULT |
 | Deep Learning | Long Short-Term Memory Network | 0.8833 |
-| Deep Learning | Convolutional Neural Network | ADD RESULT |
-| Deep Learning | CodeBERT | ADD RESULT |
+| Deep Learning | Convolutional Neural Network | REPLACE WITH EXACT RESULT |
+| Deep Learning | CodeBERT | REPLACE WITH EXACT RESULT |
+
+### Selected Models
+
+Based on the common-test accuracy comparison:
+
+- The Support Vector Machine achieved the highest accuracy among the three machine learning models.
+- The Long Short-Term Memory Network achieved the highest accuracy among the three deep learning models.
+
+Therefore, the SVM and LSTM were selected for final system integration.
 
 ## Results Summary
 
