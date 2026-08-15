@@ -287,16 +287,6 @@ Decision threshold: Approximately 0.4743
 Random seed: 42
 ```
 
-### Selected Models
-
-After evaluating all six models using the same common dataset split:
-
-- The Support Vector Machine achieved the highest accuracy among the machine learning models.
-- The Long Short-Term Memory Network achieved the highest accuracy among the deep learning models.
-
-Therefore, the SVM and LSTM were selected for final system integration.
-
----
 ### Six-Model Accuracy Comparison
 
 All six models were trained and evaluated using the same common dataset split to ensure a fair comparison.
@@ -304,11 +294,11 @@ All six models were trained and evaluated using the same common dataset split to
 | Category | Model | Accuracy |
 |---|---|---:|
 | Machine Learning | Support Vector Machine | 0.8680 |
-| Machine Learning | Random Forest | REPLACE WITH EXACT RESULT |
-| Machine Learning | XGBoost | REPLACE WITH EXACT RESULT |
+| Machine Learning | Random Forest | ADD EXACT COMMON-TEST RESULT |
+| Machine Learning | XGBoost | ADD EXACT COMMON-TEST RESULT |
 | Deep Learning | Long Short-Term Memory Network | 0.8833 |
-| Deep Learning | Convolutional Neural Network | REPLACE WITH EXACT RESULT |
-| Deep Learning | CodeBERT | REPLACE WITH EXACT RESULT |
+| Deep Learning | Convolutional Neural Network | ADD EXACT COMMON-TEST RESULT |
+| Deep Learning | CodeBERT | ADD EXACT COMMON-TEST RESULT |
 
 ### Selected Models
 
@@ -319,48 +309,9 @@ Based on the common-test accuracy comparison:
 
 Therefore, the SVM and LSTM were selected for final system integration.
 
+---
+
 ## Results Summary
-
-The final SVM and LSTM models were evaluated using the common test set containing 1,500 source-code functions.
-
-### Performance Comparison
-
-| Metric | SVM | LSTM |
-|---|---:|---:|
-| Accuracy | 0.8680 | 0.8833 |
-| Precision | 0.1726 | 0.1520 |
-| Recall | 0.3295 | 0.2159 |
-| F1-score | 0.2266 | 0.1784 |
-| Average Precision | 0.1949 | 0.1181 |
-| ROC-AUC | 0.7232 | 0.5901 |
-
-### SVM Confusion Matrix
-
-```text
-[[1273, 139],
- [  59,  29]]
-```
-
-The SVM produced:
-
-- 1,273 true negatives
-- 139 false positives
-- 59 false negatives
-- 29 true positives
-
-### LSTM Confusion Matrix
-
-```text
-[[1306, 106],
- [  69,  19]]
-```
-
-The LSTM produced:
-
-- 1,306 true negatives
-- 106 false positives
-- 69 false negatives
-- 19 true positives
 
 ### Results Interpretation
 
