@@ -8,37 +8,51 @@
 | CIT-24-01-0249 | Loshan Mihisara | Random Forest | Convolutional Neural Network |
 | CIT-24-01-0475 | Nadil Kularathne | XGBoost | CodeBERT |
 
-Each group member independently developed one machine learning model and one deep learning model. All six models were evaluated using a common dataset split to ensure a fair comparison.
+Each group member independently developed one Machine Learning model and one Deep Learning model.
+
+A total of six models were trained and evaluated using the same common dataset split to ensure a fair comparison. The best-performing Machine Learning and Deep Learning models were then selected for final system integration.
 
 ---
 
 ## Problem Statement
 
-Manual source-code vulnerability detection is time-consuming and requires experienced cybersecurity professionals. Analysing a large number of source-code functions manually can also be difficult and inefficient.
+Manual source-code vulnerability detection is time-consuming and requires cybersecurity knowledge, secure programming experience and careful code review.
 
-This project investigates how Natural Language Processing, Machine Learning and Deep Learning techniques can be used to identify patterns associated with software vulnerabilities.
+Reviewing a large number of source-code functions manually can be difficult, inefficient and expensive. Existing vulnerability-detection tools may also produce false positives or fail to identify vulnerabilities that depend on contextual source-code patterns.
+
+This project investigates how Natural Language Processing, Machine Learning and Deep Learning techniques can be used to identify patterns associated with vulnerable source code.
 
 The system treats source code as textual and sequential data and classifies each source-code function as:
 
-- Non-vulnerable
-- Vulnerable
+- **Non-vulnerable**
+- **Vulnerable**
 
-The main objective of the project is to develop and compare six different models and integrate the best-performing machine learning and deep learning models into a reusable source-code vulnerability-detection system.
+The main objectives of the project are to:
+
+- Preprocess source code as textual and sequential data
+- Develop three Machine Learning models
+- Develop three Deep Learning models
+- Evaluate all six models using the same common dataset split
+- Compare the models using accuracy and vulnerability-focused evaluation metrics
+- Select the best-performing Machine Learning and Deep Learning models
+- Integrate the selected models into a reusable vulnerability-detection pipeline
+
+The final system is intended to support vulnerability screening and secure code review. It is not intended to replace professional static analysis, manual security assessment or penetration testing.
 
 ---
 
 ## Dataset Information
 
-The project uses the DiverseVul dataset.
+The project uses the **DiverseVul dataset**.
 
-The original dataset contains more than 320,000 labelled source-code functions collected from real-world open-source projects.
+The original DiverseVul dataset contains more than 320,000 labelled source-code functions collected from real-world open-source projects.
 
 The target labels are:
 
 - `0` — Non-vulnerable
 - `1` — Vulnerable
 
-For the current project, a reproducible stratified subset of 10,000 records was used.
+For this project, a reproducible stratified subset of **10,000 source-code functions** was used.
 
 ### Dataset Distribution
 
@@ -46,16 +60,19 @@ For the current project, a reproducible stratified subset of 10,000 records was 
 |---|---:|
 | Non-vulnerable | 9,409 |
 | Vulnerable | 591 |
-| Total | 10,000 |
+| **Total** | **10,000** |
 
-The dataset is highly imbalanced because the number of non-vulnerable functions is much higher than the number of vulnerable functions.
+The dataset is highly imbalanced because the number of non-vulnerable functions is significantly higher than the number of vulnerable functions.
 
-To handle this imbalance, the project uses:
+The following techniques were used to address the class imbalance:
 
 - Stratified dataset splitting
-- Balanced class weights
-- Validation-based decision thresholds
-- Precision, recall, F1-score, Average Precision and ROC-AUC in addition to accuracy
+- Balanced class weighting
+- Validation-selected decision thresholds
+- Precision, recall and F1-score evaluation
+- Average Precision evaluation
+- ROC-AUC evaluation
+- Confusion-matrix analysis
 
 ### Common Dataset Split
 
@@ -72,21 +89,45 @@ The common test set contains:
 - 1,412 non-vulnerable functions
 - 88 vulnerable functions
 
-The dataset split was created using:
+The dataset split configuration is:
 
 ```text
 Random seed: 42
-Training: 70%
-Validation: 15%
-Testing: 15%
+Training set: 70%
+Validation set: 15%
+Test set: 15%
 Stratified sampling: Enabled
 ```
 
-Large dataset files are excluded from GitHub using `.gitignore`.
+The generated common dataset files are:
+
+```text
+data/processed/common/common_train.csv
+data/processed/common/common_validation.csv
+data/processed/common/common_test.csv
+```
+
+Each common dataset file contains at least the following columns:
+
+```text
+func
+target
+```
+
+Large dataset files are excluded from GitHub through `.gitignore`.
 
 ---
 
 ## Setup Instructions
+
+### Prerequisites
+
+The following software is required:
+
+- Python 3.12 or a compatible Python version
+- Git
+- pip
+- A terminal such as PowerShell, Command Prompt, Bash or the VS Code terminal
 
 ### 1. Clone the Repository
 
@@ -103,35 +144,58 @@ python -m venv .venv
 
 ### 3. Activate the Virtual Environment
 
-For Windows PowerShell:
+#### Windows PowerShell
 
 ```powershell
 .\.venv\Scripts\Activate.ps1
 ```
 
-For Linux or macOS:
+If PowerShell blocks the activation script, run:
+
+```powershell
+Set-ExecutionPolicy -Scope Process -ExecutionPolicy RemoteSigned
+.\.venv\Scripts\Activate.ps1
+```
+
+#### Windows Command Prompt
+
+```cmd
+.venv\Scripts\activate
+```
+
+#### Linux or macOS
 
 ```bash
 source .venv/bin/activate
 ```
 
-### 4. Install the Required Dependencies
+### 4. Upgrade pip
 
 ```bash
 python -m pip install --upgrade pip
+```
+
+### 5. Install the Required Dependencies
+
+```bash
 pip install -r requirements.txt
 ```
 
-### 5. Add the Dataset Files
+### 6. Add the Dataset Files
 
-Place the original and processed dataset files inside:
+Place the original DiverseVul dataset inside:
 
 ```text
 data/raw/
+```
+
+Place the prepared 10,000-record dataset inside:
+
+```text
 data/processed/
 ```
 
-The common dataset files should be placed inside:
+The common dataset files should be located at:
 
 ```text
 data/processed/common/common_train.csv
@@ -139,18 +203,11 @@ data/processed/common/common_validation.csv
 data/processed/common/common_test.csv
 ```
 
-Each common dataset file must contain at least the following columns:
+### 7. Add the Trained Model Files
 
-```text
-func
-target
-```
+The trained model files are excluded from GitHub because of their file sizes.
 
-### 6. Add the Trained Model Files
-
-The trained model files are stored locally because they are too large to upload directly to GitHub.
-
-Place the following model files inside the `models` folder:
+Place the following final model artifacts inside the `models` directory:
 
 ```text
 models/CIT-24-01-0251_svm_weighted_hybrid_final.joblib
@@ -161,6 +218,41 @@ models/CIT-24-01-0251_lstm_embedding32_preprocessing.joblib
 ---
 
 ## How to Run the Project
+
+All commands should be executed from the project root directory after activating the virtual environment.
+
+### Create the Common Dataset Split
+
+```powershell
+python .\src\create_common_dataset_split.py
+```
+
+This script creates:
+
+```text
+data/processed/common/common_train.csv
+data/processed/common/common_validation.csv
+data/processed/common/common_test.csv
+```
+
+It also displays:
+
+- Number of training, validation and testing records
+- Class distributions
+- Random seed
+- SHA-256 file-verification hashes
+
+### Train the Final Support Vector Machine
+
+```powershell
+python .\src\cit_24_01_0251_svm_weighted_hybrid_final.py
+```
+
+### Train the Final Long Short-Term Memory Network
+
+```powershell
+python .\src\cit_24_01_0251_lstm_embedding32_final.py
+```
 
 ### Run the SVM Pipeline Using a Source-Code File
 
@@ -196,25 +288,35 @@ The combined pipeline returns:
 
 - SVM prediction
 - SVM decision score
+- SVM decision threshold
 - LSTM prediction
 - LSTM vulnerability probability
-- Decision thresholds
-- Model agreement status
-- Final agreed label
+- LSTM decision threshold
+- Number of vulnerable votes
+- Model-agreement status
+- Final agreed prediction
 
-### Create the Common Dataset Split
+When both models produce the same prediction, the pipeline returns the agreed result.
 
-```powershell
-python .\src\create_common_dataset_split.py
-```
+When the models disagree, the output indicates that further review is required.
 
-### Evaluate the Final Models Using the Common Test Set
+### Evaluate the Selected Models on the Common Test Set
 
 ```powershell
 python .\src\evaluate_common_test.py
 ```
 
-The evaluation results are saved inside:
+The evaluation script calculates:
+
+- Accuracy
+- Precision
+- Recall
+- F1-score
+- Average Precision
+- ROC-AUC
+- Confusion matrix
+
+The results are saved to:
 
 ```text
 reports/CIT-24-01-0251_common_test_results.json
@@ -230,15 +332,15 @@ python -m pytest -q
 
 ## Model Summary
 
-A total of six models were developed and evaluated.
+A total of six models were developed and evaluated during the project.
 
 ### Machine Learning Models
 
 | Model | Description |
 |---|---|
-| Support Vector Machine | Uses weighted token-level and character-level TF-IDF features with a LinearSVC classifier |
-| Random Forest | Uses multiple decision trees to classify source-code functions |
-| XGBoost | Uses gradient-boosted decision trees for vulnerability classification |
+| Support Vector Machine | Uses weighted token-level and character-level TF-IDF representations with a LinearSVC classifier |
+| Random Forest | Uses an ensemble of decision trees to classify source-code functions |
+| XGBoost | Uses gradient-boosted decision trees for source-code vulnerability classification |
 
 ### Deep Learning Models
 
@@ -246,11 +348,11 @@ A total of six models were developed and evaluated.
 |---|---|
 | Long Short-Term Memory Network | Processes source code as a sequence of programming-related tokens |
 | Convolutional Neural Network | Uses convolutional filters to identify local source-code patterns |
-| CodeBERT | Uses a pretrained transformer model designed for programming-language and natural-language data |
+| CodeBERT | Uses a pretrained transformer architecture designed for programming-language and natural-language data |
 
 ### Final Support Vector Machine Configuration
 
-The final SVM uses a weighted combination of token TF-IDF and character TF-IDF features.
+The final SVM uses a weighted hybrid combination of token-level TF-IDF and character-level TF-IDF features.
 
 ```text
 Model: LinearSVC
@@ -264,9 +366,24 @@ Decision threshold: Approximately 0.0278
 Random seed: 42
 ```
 
-Token TF-IDF captures programming-language keywords, identifiers and operators.
+Token-level TF-IDF captures programming-language elements such as:
 
-Character TF-IDF captures local syntax, character patterns and programming structures.
+- Keywords
+- Identifiers
+- Function names
+- Operators
+- Data types
+- Programming tokens
+
+Character-level TF-IDF captures:
+
+- Local syntax patterns
+- Character sequences
+- Identifier fragments
+- Operator combinations
+- Programming structures
+
+The token and character representations are weighted and combined before being passed to the LinearSVC classifier.
 
 ### Final Long Short-Term Memory Network Configuration
 
@@ -287,9 +404,24 @@ Decision threshold: Approximately 0.4743
 Random seed: 42
 ```
 
-### Six-Model Accuracy Comparison
+The LSTM pipeline performs the following operations:
+
+1. Source-code preprocessing
+2. Tokenization
+3. Integer-sequence conversion
+4. Sequence padding or truncation
+5. Embedding-layer processing
+6. LSTM sequence learning
+7. Dense-layer classification
+8. Validation-selected decision-threshold application
+
+---
+
+## Results Summary
 
 All six models were trained and evaluated using the same common dataset split to ensure a fair comparison.
+
+### Six-Model Accuracy Comparison
 
 | Category | Model | Accuracy |
 |---|---|---:|
@@ -304,24 +436,89 @@ All six models were trained and evaluated using the same common dataset split to
 
 Based on the common-test accuracy comparison:
 
-- The Support Vector Machine achieved the highest accuracy among the three machine learning models.
-- The Long Short-Term Memory Network achieved the highest accuracy among the three deep learning models.
+- The **Support Vector Machine** achieved the highest accuracy among the three Machine Learning models.
+- The **Long Short-Term Memory Network** achieved the highest accuracy among the three Deep Learning models.
 
 Therefore, the SVM and LSTM were selected for final system integration.
 
----
+### Detailed Results of the Selected Models
 
-## Results Summary
+The final SVM and LSTM models were evaluated using the common test set containing **1,500 source-code functions**.
+
+The test set contains:
+
+- 1,412 non-vulnerable functions
+- 88 vulnerable functions
+
+### Performance Comparison
+
+| Metric | SVM | LSTM |
+|---|---:|---:|
+| Accuracy | 0.8680 | 0.8833 |
+| Precision | 0.1726 | 0.1520 |
+| Recall | 0.3295 | 0.2159 |
+| F1-score | 0.2266 | 0.1784 |
+| Average Precision | 0.1949 | 0.1181 |
+| ROC-AUC | 0.7232 | 0.5901 |
+
+### Performance Comparison in Percentages
+
+| Metric | SVM | LSTM |
+|---|---:|---:|
+| Accuracy | 86.80% | 88.33% |
+| Precision | 17.26% | 15.20% |
+| Recall | 32.95% | 21.59% |
+| F1-score | 22.66% | 17.84% |
+| Average Precision | 19.49% | 11.81% |
+| ROC-AUC | 72.32% | 59.01% |
+
+### SVM Confusion Matrix
+
+```text
+[[1273, 139],
+ [  59,  29]]
+```
+
+The SVM produced:
+
+- 1,273 true negatives
+- 139 false positives
+- 59 false negatives
+- 29 true positives
+
+### LSTM Confusion Matrix
+
+```text
+[[1306, 106],
+ [  69,  19]]
+```
+
+The LSTM produced:
+
+- 1,306 true negatives
+- 106 false positives
+- 69 false negatives
+- 19 true positives
 
 ### Results Interpretation
 
-The LSTM achieved the highest overall accuracy of 88.33%, while the SVM achieved an accuracy of 86.80%.
+The LSTM achieved the highest overall accuracy of **88.33%**, while the SVM achieved an accuracy of **86.80%**.
 
-However, the SVM performed better in detecting vulnerable source-code functions. It achieved higher precision, recall, F1-score, Average Precision and ROC-AUC than the LSTM.
+However, the SVM performed better in detecting vulnerable source-code functions. It achieved higher:
 
-The accuracy results must be interpreted carefully because the common test set is highly imbalanced. Most test samples are non-vulnerable, which can result in high accuracy even when some vulnerable functions are not detected.
+- Precision
+- Recall
+- F1-score
+- Average Precision
+- ROC-AUC
 
-Therefore, the final evaluation also considered:
+The SVM correctly identified 29 of the 88 vulnerable test functions, while the LSTM correctly identified 19.
+
+The SVM therefore demonstrated stronger vulnerable-class detection performance under the current dataset and experimental configuration.
+
+The accuracy values must be interpreted carefully because the common test set is highly imbalanced. Most test samples are non-vulnerable, which can produce high overall accuracy even when vulnerable functions are missed.
+
+For this reason, the final evaluation considered the following measures in addition to accuracy:
 
 - Precision
 - Recall
@@ -330,6 +527,6 @@ Therefore, the final evaluation also considered:
 - ROC-AUC
 - Confusion matrices
 
-The final integrated system runs both the SVM and LSTM models on the same source-code input and reports whether their predictions agree.
+The final integrated pipeline runs both selected models on the same source-code input and reports whether their predictions agree.
 
-The developed system should be used as a vulnerability-screening and decision-support tool. It is not intended to replace professional static analysis, manual secure code review or penetration testing.
+The developed system should be used as a vulnerability-screening and decision-support tool. It should not be used as the only security-review mechanism or as a replacement for professional static analysis, manual secure code review and penetration testing.
