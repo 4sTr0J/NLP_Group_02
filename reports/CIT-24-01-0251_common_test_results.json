@@ -1,0 +1,40 @@
+{
+    "student_id": "CIT-24-01-0251",
+    "common_test_records": 1500,
+    "svm": {
+        "accuracy": 0.868,
+        "precision": 0.17261904761904762,
+        "recall": 0.32954545454545453,
+        "f1_score": 0.2265625,
+        "average_precision": 0.1948853815311529,
+        "roc_auc": 0.7231924414112798,
+        "confusion_matrix": [
+            [
+                1273,
+                139
+            ],
+            [
+                59,
+                29
+            ]
+        ]
+    },
+    "lstm": {
+        "accuracy": 0.8833333333333333,
+        "precision": 0.152,
+        "recall": 0.2159090909090909,
+        "f1_score": 0.1784037558685446,
+        "average_precision": 0.11810585193492346,
+        "roc_auc": 0.5901405163533351,
+        "confusion_matrix": [
+            [
+                1306,
+                106
+            ],
+            [
+                69,
+                19
+            ]
+        ]
+    }
+}

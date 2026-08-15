@@ -1,0 +1,51 @@
+{
+    "student_id": "CIT-24-01-0251",
+    "model": "LinearSVC",
+    "variant": "weighted_token_character_hybrid",
+    "configuration": {
+        "token_weight": 0.75,
+        "character_weight": 1.0,
+        "C": 0.05,
+        "decision_threshold": 0.02782375882777144,
+        "token_features": 50000,
+        "character_features": 50000,
+        "total_features": 100000,
+        "random_seed": 42
+    },
+    "validation_metrics": {
+        "accuracy": 0.8726666666666667,
+        "precision": 0.2,
+        "recall": 0.38202247191011235,
+        "f1_score": 0.2625482625482625,
+        "average_precision": 0.18967532855358826,
+        "roc_auc": 0.7265307097524267,
+        "confusion_matrix": [
+            [
+                1275,
+                136
+            ],
+            [
+                55,
+                34
+            ]
+        ]
+    },
+    "test_metrics": {
+        "accuracy": 0.868,
+        "precision": 0.17261904761904762,
+        "recall": 0.32954545454545453,
+        "f1_score": 0.2265625,
+        "average_precision": 0.1948853815311529,
+        "roc_auc": 0.7231924414112798,
+        "confusion_matrix": [
+            [
+                1273,
+                139
+            ],
+            [
+                59,
+                29
+            ]
+        ]
+    }
+}
