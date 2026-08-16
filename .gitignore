@@ -216,13 +216,3 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
-
-# Local dataset files
-data/raw/
-data/processed/
-
-# Large trained model files
-*.pkl
-*.joblib
-*.keras
-*.h5
