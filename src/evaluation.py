@@ -1,4 +1,5 @@
 import ast
+import os
 import joblib
 import pandas as pd
 import numpy as np
@@ -11,6 +12,7 @@ from sklearn.metrics import (
     recall_score,
     f1_score,
     confusion_matrix,
+    ConfusionMatrixDisplay,
     classification_report
 )
 
@@ -85,8 +87,21 @@ print(f"Precision: {rf_precision:.4f}")
 print(f"Recall   : {rf_recall:.4f}")
 print(f"F1-Score : {rf_f1:.4f}")
 
+rf_cm = confusion_matrix(y_test, rf_predictions)
 print("\nRandom Forest Confusion Matrix:")
-print(confusion_matrix(y_test, rf_predictions))
+print(rf_cm)
+
+os.makedirs("reports", exist_ok=True)
+rf_display = ConfusionMatrixDisplay(
+    confusion_matrix=rf_cm,
+    display_labels=["Benign", "Vulnerable"]
+)
+rf_display.plot(cmap=plt.cm.Blues)
+plt.title("Random Forest Confusion Matrix")
+plt.tight_layout()
+plt.savefig("reports/random_forest_confusion_matrix.png", dpi=300, bbox_inches="tight")
+plt.close()
+print("\nRandom Forest confusion matrix saved to reports/random_forest_confusion_matrix.png")
 
 print("\nRandom Forest Classification Report:")
 print(
@@ -170,13 +185,20 @@ print(f"Precision: {cnn_precision:.4f}")
 print(f"Recall   : {cnn_recall:.4f}")
 print(f"F1-Score : {cnn_f1:.4f}")
 
+cnn_cm = confusion_matrix(y_test, cnn_predictions)
 print("\nCNN Confusion Matrix:")
-print(
-    confusion_matrix(
-        y_test,
-        cnn_predictions
-    )
+print(cnn_cm)
+
+cnn_display = ConfusionMatrixDisplay(
+    confusion_matrix=cnn_cm,
+    display_labels=["Benign", "Vulnerable"]
 )
+cnn_display.plot(cmap=plt.cm.Blues)
+plt.title("CNN Confusion Matrix")
+plt.tight_layout()
+plt.savefig("reports/cnn_confusion_matrix.png", dpi=300, bbox_inches="tight")
+plt.close()
+print("\nCNN confusion matrix saved to reports/cnn_confusion_matrix.png")
 
 print("\nCNN Classification Report:")
 print(
